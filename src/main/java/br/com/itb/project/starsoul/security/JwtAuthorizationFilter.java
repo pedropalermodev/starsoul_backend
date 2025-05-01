@@ -10,6 +10,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtAuthorizationFilter extends OncePerRequestFilter {
@@ -54,6 +57,9 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             DecodedJWT decodedJWT = JWT.require(algorithm).build().verify(token);
 
+            String role = decodedJWT.getClaim("role").asString();
+            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
+
             // Verificação de expiração
             if (decodedJWT.getExpiresAt().before(new Date())) {
                 sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
@@ -76,7 +82,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            userDetails.getAuthorities());
+                            authorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);

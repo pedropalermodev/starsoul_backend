@@ -17,15 +17,13 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // Busca o usuário no banco de dados (com tratamento case insensitive)
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + email));
 
-        // Retorna o UserDetails que o Spring Security precisa
         return User.builder()
                 .username(usuario.getEmail())
-                .password(usuario.getSenhaHash()) // Certifique-se que a senha está codificada
-                .roles(usuario.getTipoConta()) // Ex: "Administrador" vira "ROLE_ADMINISTRADOR"
+                .password(usuario.getSenhaHash())
+                .roles(usuario.getTipoConta())
                 .build();
     }
 }
