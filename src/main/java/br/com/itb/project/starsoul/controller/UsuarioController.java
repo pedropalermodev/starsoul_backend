@@ -81,8 +81,15 @@ public class UsuarioController {
 
     @PutMapping("{id}")
     public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
-        Usuario usuario = usuarioService.atualizarUsuario(id, usuarioAtualizado);
-        return ResponseEntity.ok(usuario);
+        try {
+            Usuario usuario = usuarioService.atualizarUsuario(id, usuarioAtualizado);
+            if (usuarioAtualizado == null) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+            }
+            return ResponseEntity.ok(usuario);
+        } catch (BadRequest e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
     }
 
     @DeleteMapping("{id}")

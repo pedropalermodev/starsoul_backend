@@ -86,6 +86,10 @@ public class UsuarioService {
             throw new BadRequest(errorMessage.toString());
         }
 
+        if (usuarioRepository.existsByEmail(usuarioAtualizado.getEmail())) {
+            return null;
+        }
+
         usuarioDb.setNome(usuarioAtualizado.getNome());
         usuarioDb.setEmail(usuarioAtualizado.getEmail());
         usuarioDb.setSenhaHash(usuarioAtualizado.getSenhaHash());
