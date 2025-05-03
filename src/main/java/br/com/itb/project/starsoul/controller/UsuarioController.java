@@ -24,16 +24,14 @@ public class UsuarioController {
         this.usuarioService = usuarioService;
     }
 
-    @PostMapping("/criar/cadastro")
-    @PreAuthorize("hasAuthority('Administrador')")
-    public ResponseEntity<Usuario> cadastrarUsuarioAdministrador(@RequestBody Usuario usuario) {
-        try {
-            Usuario novoUsuario = usuarioService.cadastrarUsuario(usuario);
 
+    @PostMapping("/cadastrar")
+    public ResponseEntity<Usuario> cadastrarUsuarioPublico(@RequestBody Usuario usuario) {
+        try {
+            Usuario novoUsuario = usuarioService.cadastrarNovoUsuarioPublico(usuario);
             if (novoUsuario == null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
             }
-
             return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
         } catch (BadRequest e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
@@ -53,19 +51,32 @@ public class UsuarioController {
         }
     }
 
+    @PutMapping("/me")
+    public ResponseEntity<Usuario> atualizarMeuPerfil( @RequestBody Usuario usuarioAtualizado, @AuthenticationPrincipal UserDetails userDetails) {
+        Usuario usuarioAtualizadoResponse = usuarioService.atualizarUsuarioLogado(userDetails, usuarioAtualizado);
+        if (usuarioAtualizadoResponse != null) {
+            return ResponseEntity.ok(usuarioAtualizadoResponse);
+        } else {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 
-    @PostMapping("/cadastrar")
-    public ResponseEntity<Usuario> cadastrarUsuarioPublico(@RequestBody Usuario usuario) {
+    @PostMapping("/criar/cadastro")
+    @PreAuthorize("hasAuthority('Administrador')")
+    public ResponseEntity<Usuario> cadastrarUsuarioAdministrador(@RequestBody Usuario usuario) {
         try {
-            Usuario novoUsuario = usuarioService.cadastrarNovoUsuarioPublico(usuario);
+            Usuario novoUsuario = usuarioService.cadastrarUsuario(usuario);
+
             if (novoUsuario == null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
             }
+
             return ResponseEntity.status(HttpStatus.CREATED).body(novoUsuario);
         } catch (BadRequest e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
+
 
     @GetMapping("{id}")
     public ResponseEntity<Usuario> listarUsuario(@PathVariable Long id) {
@@ -83,7 +94,7 @@ public class UsuarioController {
     public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
         try {
             Usuario usuario = usuarioService.atualizarUsuario(id, usuarioAtualizado);
-            if (usuarioAtualizado == null) {
+            if (usuario == null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
             }
             return ResponseEntity.ok(usuario);
