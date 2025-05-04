@@ -1,11 +1,13 @@
 package br.com.itb.project.starsoul.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
@@ -47,8 +49,8 @@ public class Usuario {
     private String apelido;
 
     @Column(name = "dataNascimento",nullable = true)
-    @Temporal(TemporalType.DATE)
-    private Date dataNascimento;
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    private LocalDate dataNascimento;
 
     @Column(nullable = true)
     private String genero;
@@ -121,11 +123,11 @@ public class Usuario {
         this.apelido = apelido;
     }
 
-    public Date getDataNascimento() {
+    public LocalDate getDataNascimento() {
         return dataNascimento;
     }
 
-    public void setDataNascimento(Date dataNascimento) {
+    public void setDataNascimento(LocalDate dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
 

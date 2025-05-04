@@ -11,6 +11,9 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -63,8 +66,26 @@ public class UsuarioController {
 
     @PostMapping("/criar/cadastro")
     @PreAuthorize("hasAuthority('Administrador')")
-    public ResponseEntity<Usuario> cadastrarUsuarioAdministrador(@RequestBody Usuario usuario) {
+    public ResponseEntity<Usuario> cadastrarUsuarioAdministrador(@RequestBody Usuario usuario, @RequestParam(value = "dataNascimento", required = false) String dataNascimentoStr) {
         try {
+
+            if(dataNascimentoStr != null && !dataNascimentoStr.isEmpty()) {
+                OffsetDateTime offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
+                LocalDate dataNascimento = offsetDateTime.toLocalDate();
+                LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo")); // Obtém a data atual no fuso horário de São Paulo
+                LocalDate dataMinima = LocalDate.of(1911, 10, 6); // Exemplo de data mínima (você pode ajustar)
+
+                if (dataNascimento.isAfter(hoje)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Usuario()); // Ou uma mensagem de erro específica
+                }
+
+                if (dataNascimento.isBefore(dataMinima)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Usuario()); // Ou outra mensagem de erro
+                }
+
+                usuario.setDataNascimento(dataNascimento);
+            }
+
             Usuario novoUsuario = usuarioService.cadastrarUsuario(usuario);
 
             if (novoUsuario == null) {
@@ -91,8 +112,26 @@ public class UsuarioController {
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado) {
+    public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado, @RequestParam(value = "dataNascimento", required = false) String dataNascimentoStr) {
         try {
+
+            if (dataNascimentoStr != null && !dataNascimentoStr.isEmpty()) {
+                OffsetDateTime offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
+                LocalDate dataNascimento = offsetDateTime.toLocalDate();
+                LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+                LocalDate dataMinima = LocalDate.of(1911, 10, 6);
+
+                if (dataNascimento.isAfter(hoje)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Usuario());
+                }
+
+                if (dataNascimento.isBefore(dataMinima)) {
+                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Usuario());
+                }
+
+                usuarioAtualizado.setDataNascimento(dataNascimento);
+            }
+
             Usuario usuario = usuarioService.atualizarUsuario(id, usuarioAtualizado);
             if (usuario == null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
