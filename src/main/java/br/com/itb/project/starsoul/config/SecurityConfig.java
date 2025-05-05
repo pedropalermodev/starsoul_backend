@@ -27,6 +27,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Libera todas as OPTIONS
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/usuarios/cadastrar").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/feedbacks").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/conteudos/findAll").permitAll()
                         .requestMatchers("/api/usuarios/me").authenticated()
                         .requestMatchers("/api/**").hasAuthority("Administrador")
