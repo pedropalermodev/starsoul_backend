@@ -69,7 +69,7 @@ public class UsuarioController {
     public ResponseEntity<Usuario> cadastrarUsuarioAdministrador(@RequestBody Usuario usuario, @RequestParam(value = "dataNascimento", required = false) String dataNascimentoStr) {
         try {
 
-            // Atualizando a classe Usuario Controller
+            // Atualizando a classe Usuario Controller Testando novamente
             if(dataNascimentoStr != null && !dataNascimentoStr.isEmpty()) {
                 OffsetDateTime offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
                 LocalDate dataNascimento = offsetDateTime.toLocalDate();
