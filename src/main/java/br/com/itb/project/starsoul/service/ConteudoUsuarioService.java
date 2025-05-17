@@ -8,6 +8,7 @@ import br.com.itb.project.starsoul.repository.ConteudoUsuarioRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -26,7 +27,7 @@ public class ConteudoUsuarioService {
                 .orElse(new ConteudoUsuario(usuario, conteudo));
 
         conteudoUsuarioRelacao.setNumeroVisualizacoes(conteudoUsuarioRelacao.getNumeroVisualizacoes() + 1);
-        conteudoUsuarioRelacao.setDataUltimoAcesso(new Date());
+        conteudoUsuarioRelacao.setDataUltimoAcesso(LocalDateTime.now());
 
         return conteudoUsuarioRepository.save(conteudoUsuarioRelacao);
     }

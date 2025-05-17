@@ -57,9 +57,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             DecodedJWT decodedJWT = JWT.require(algorithm).build().verify(token);
 
-            String role = decodedJWT.getClaim("role").asString();
-            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
-
             // Verificação de expiração
             if (decodedJWT.getExpiresAt().before(new Date())) {
                 sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
@@ -82,7 +79,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
-                            authorities);
+                            userDetails.getAuthorities());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             filterChain.doFilter(request, response);

@@ -3,6 +3,7 @@ package br.com.itb.project.starsoul.model;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -30,9 +31,8 @@ public class ConteudoUsuario {
 
 
     @CreationTimestamp
-    @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "dataUltimoAcesso", nullable = false, updatable = false)
-    private Date dataUltimoAcesso;
+    private LocalDateTime dataUltimoAcesso;
 
 
     @Column(name = "numeroVisualizacoes")
@@ -83,11 +83,11 @@ public class ConteudoUsuario {
         this.favoritado = favoritado;
     }
 
-    public Date getDataUltimoAcesso() {
+    public LocalDateTime getDataUltimoAcesso() {
         return dataUltimoAcesso;
     }
 
-    public void setDataUltimoAcesso(Date dataUltimoAcesso) {
+    public void setDataUltimoAcesso(LocalDateTime dataUltimoAcesso) {
         this.dataUltimoAcesso = dataUltimoAcesso;
     }
 
