@@ -56,20 +56,28 @@ public class UsuarioService {
         Usuario usuarioDb = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFound("Usuário não encontrado com o e-mail " + email));
 
-        Set<ConstraintViolation<Usuario>> violations = validator.validate(usuarioAtualizado);
+
+        if (usuarioAtualizado.getNome() != null && !usuarioAtualizado.getNome().isBlank()) {
+            usuarioDb.setNome(usuarioAtualizado.getNome());
+        }
+
+        if (usuarioAtualizado.getEmail() != null && !usuarioAtualizado.getEmail().isBlank()) {
+            usuarioDb.setEmail(usuarioAtualizado.getEmail());
+        }
+
+        usuarioDb.setApelido(usuarioAtualizado.getApelido());
+        usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
+        usuarioDb.setGenero(usuarioAtualizado.getGenero());
+
+
+        Set<ConstraintViolation<Usuario>> violations = validator.validate(usuarioDb);
         if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
+            StringBuilder errorMessage = new StringBuilder("Erros de validação ao salvar:\n");
             for (ConstraintViolation<Usuario> violation : violations) {
                 errorMessage.append(violation.getMessage()).append("\n");
             }
             throw new BadRequest(errorMessage.toString());
         }
-
-        usuarioDb.setNome(usuarioAtualizado.getNome());
-        usuarioDb.setEmail(usuarioAtualizado.getEmail());
-        usuarioDb.setApelido(usuarioAtualizado.getApelido());
-        usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
-        usuarioDb.setGenero(usuarioAtualizado.getGenero());
 
         return usuarioRepository.save(usuarioDb);
     }
