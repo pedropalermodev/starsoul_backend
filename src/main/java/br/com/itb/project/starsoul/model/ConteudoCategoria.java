@@ -28,4 +28,5 @@ public class ConteudoCategoria {
     @ManyToOne
     @JoinColumn(name = "categoriaId")
     private Categoria categoria;
+
 }

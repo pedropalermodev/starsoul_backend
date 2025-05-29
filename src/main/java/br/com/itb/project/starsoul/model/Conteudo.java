@@ -16,7 +16,7 @@ import java.util.List;
         property = "@id"
 )
 @Entity
-@Table(name = "conteudos")
+@Table(name = "conteudo")
 public class Conteudo {
 
     @Id
@@ -33,10 +33,10 @@ public class Conteudo {
 
     @Column(nullable = false)
     @Size(max = 5, message = "O tipo deve ter no máximo 5 caracteres.")
-    private String tipoConteudo;
+    private String formato;
 
     @Column(nullable = false)
-    private String arquivoUrl;
+    private String url;
 
     @CreationTimestamp
     @Temporal(TemporalType.TIMESTAMP)
@@ -49,11 +49,8 @@ public class Conteudo {
     @OneToMany(mappedBy = "conteudo", cascade = CascadeType.ALL, orphanRemoval = true )
     private List<ConteudoTag> tags = new ArrayList<>();
 
+
     // Nullable
-
-
-    @Column(nullable = true)
-    private String caminhoMiniatura;
 
     @Column(nullable = true)
     @Size(min = 10, message = "A descrição deve ter pelo menos 10 caracteres.")
@@ -61,9 +58,6 @@ public class Conteudo {
 
 
     // Getters And Setters
-
-
-
 
     public Long getId() {
         return id;
@@ -87,20 +81,20 @@ public class Conteudo {
         this.codStatus = codStatus;
     }
 
-    public String getTipoConteudo() {
-        return tipoConteudo;
+    public String getFormato() {
+        return formato;
     }
 
-    public void setTipoConteudo(String tipoConteudo) {
-        this.tipoConteudo = tipoConteudo;
+    public void setFormato(String formato) {
+        this.formato = formato;
     }
 
-    public String getArquivoUrl() {
-        return arquivoUrl;
+    public String getUrl() {
+        return url;
     }
 
-    public void setArquivoUrl(String arquivoUrl) {
-        this.arquivoUrl = arquivoUrl;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public Date getDataPublicacao() {
@@ -109,14 +103,6 @@ public class Conteudo {
 
     public void setDataPublicacao(Date dataPublicacao) {
         this.dataPublicacao = dataPublicacao;
-    }
-
-    public String getCaminhoMiniatura() {
-        return caminhoMiniatura;
-    }
-
-    public void setCaminhoMiniatura(String caminhoMiniatura) {
-        this.caminhoMiniatura = caminhoMiniatura;
     }
 
     public String getDescricao() {
@@ -142,4 +128,5 @@ public class Conteudo {
     public void setTags(List<ConteudoTag> tags) {
         this.tags = tags;
     }
+
 }

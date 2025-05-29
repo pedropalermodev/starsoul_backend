@@ -1,11 +1,11 @@
 package br.com.itb.project.starsoul.controller;
 
 import br.com.itb.project.starsoul.model.Conteudo;
-import br.com.itb.project.starsoul.model.ConteudoUsuario;
+import br.com.itb.project.starsoul.model.Historico;
 import br.com.itb.project.starsoul.model.Usuario;
 import br.com.itb.project.starsoul.repository.ConteudoRepository;
 import br.com.itb.project.starsoul.repository.UsuarioRepository;
-import br.com.itb.project.starsoul.service.ConteudoUsuarioService;
+import br.com.itb.project.starsoul.service.HistoricoService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,18 +15,18 @@ import java.util.List;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/conteudo-usuario")
-public class ConteudoUsuarioController {
+public class HistoricoController {
 
-    private final ConteudoUsuarioService conteudoUsuarioService;
+    private final HistoricoService historicoService;
     private final ConteudoRepository conteudoRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public ConteudoUsuarioController(
-            ConteudoUsuarioService conteudoUsuarioService,
+    public HistoricoController(
+            HistoricoService historicoService,
             ConteudoRepository conteudoRepository,
             UsuarioRepository usuarioRepository
     ) {
-        this.conteudoUsuarioService = conteudoUsuarioService;
+        this.historicoService = historicoService;
         this.conteudoRepository = conteudoRepository;
         this.usuarioRepository = usuarioRepository;
     }
@@ -39,38 +39,38 @@ public class ConteudoUsuarioController {
     }
 
     @PostMapping("/{conteudoId}/acessar")
-    public ResponseEntity<ConteudoUsuario> registrarAcesso(@PathVariable Long conteudoId, Authentication authentication) {
+    public ResponseEntity<Historico> registrarAcesso(@PathVariable Long conteudoId, Authentication authentication) {
         Usuario usuario = getUsuarioAutenticado(authentication);
         Conteudo conteudo = conteudoRepository.findById(conteudoId)
                 .orElseThrow(() -> new RuntimeException("Conteúdo não encontrado"));
-        return ResponseEntity.ok(conteudoUsuarioService.registrarAcesso(usuario, conteudo));
+        return ResponseEntity.ok(historicoService.registrarAcesso(usuario, conteudo));
     }
 
     @PostMapping("/{conteudoId}/favoritar")
-    public ResponseEntity<ConteudoUsuario> favoritar(@PathVariable Long conteudoId, Authentication authentication) {
+    public ResponseEntity<Historico> favoritar(@PathVariable Long conteudoId, Authentication authentication) {
         Usuario usuario = getUsuarioAutenticado(authentication);
         Conteudo conteudo = conteudoRepository.findById(conteudoId)
                 .orElseThrow(() -> new RuntimeException("Conteúdo não encontrado"));
-        return ResponseEntity.ok(conteudoUsuarioService.favoritar(usuario, conteudo));
+        return ResponseEntity.ok(historicoService.favoritar(usuario, conteudo));
     }
 
     @PostMapping("/{conteudoId}/desfavoritar")
-    public ResponseEntity<ConteudoUsuario> desfavoritar(@PathVariable Long conteudoId, Authentication authentication) {
+    public ResponseEntity<Historico> desfavoritar(@PathVariable Long conteudoId, Authentication authentication) {
         Usuario usuario = getUsuarioAutenticado(authentication);
         Conteudo conteudo = conteudoRepository.findById(conteudoId)
                 .orElseThrow(() -> new RuntimeException("Conteúdo não encontrado"));
-        return ResponseEntity.ok(conteudoUsuarioService.desfavoritar(usuario, conteudo));
+        return ResponseEntity.ok(historicoService.desfavoritar(usuario, conteudo));
     }
 
     @GetMapping("/favoritos")
-    public ResponseEntity<List<ConteudoUsuario>> listarFavoritos(Authentication authentication) {
+    public ResponseEntity<List<Historico>> listarFavoritos(Authentication authentication) {
         Usuario usuario = getUsuarioAutenticado(authentication);
-        return ResponseEntity.ok(conteudoUsuarioService.listarFavoritos(usuario));
+        return ResponseEntity.ok(historicoService.listarFavoritos(usuario));
     }
 
     @GetMapping("/historico")
-    public ResponseEntity<List<ConteudoUsuario>> listarHistorico(Authentication authentication) {
+    public ResponseEntity<List<Historico>> listarHistorico(Authentication authentication) {
         Usuario usuario = getUsuarioAutenticado(authentication);
-        return ResponseEntity.ok(conteudoUsuarioService.listarHistorico(usuario));
+        return ResponseEntity.ok(historicoService.listarHistorico(usuario));
     }
 }

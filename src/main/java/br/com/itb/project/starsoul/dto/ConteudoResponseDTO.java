@@ -9,9 +9,8 @@ public class ConteudoResponseDTO {
     private String titulo;
     private String descricao;
     private String codStatus;
-    private String tipoConteudo;
-    private String arquivoUrl;
-    private String caminhoMiniatura;
+    private String formato;
+    private String url;
     private Date dataPublicacao;
 
     private List<String> categorias;
@@ -49,28 +48,20 @@ public class ConteudoResponseDTO {
         this.codStatus = codStatus;
     }
 
-    public String getTipoConteudo() {
-        return tipoConteudo;
+    public String getFormato() {
+        return formato;
     }
 
-    public void setTipoConteudo(String tipoConteudo) {
-        this.tipoConteudo = tipoConteudo;
+    public void setFormato(String formato) {
+        this.formato = formato;
     }
 
-    public String getArquivoUrl() {
-        return arquivoUrl;
+    public String getUrl() {
+        return url;
     }
 
-    public void setArquivoUrl(String arquivoUrl) {
-        this.arquivoUrl = arquivoUrl;
-    }
-
-    public String getCaminhoMiniatura() {
-        return caminhoMiniatura;
-    }
-
-    public void setCaminhoMiniatura(String caminhoMiniatura) {
-        this.caminhoMiniatura = caminhoMiniatura;
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public Date getDataPublicacao() {
