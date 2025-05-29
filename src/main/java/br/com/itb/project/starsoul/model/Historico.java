@@ -4,46 +4,37 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
 @Table(name = "conteudo_usuario", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"usuarioId", "conteudoId"})
 })
-public class ConteudoUsuario {
+public class Historico {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne
     @JoinColumn(name = "usuarioId", nullable = false)
     private Usuario usuario;
-
 
     @ManyToOne
     @JoinColumn(name = "conteudoId", nullable = false)
     private Conteudo conteudo;
 
-
     private boolean favoritado;
-
 
     @CreationTimestamp
     @Column(name = "dataUltimoAcesso", nullable = false, updatable = false)
     private LocalDateTime dataUltimoAcesso;
 
-
     @Column(name = "numeroVisualizacoes")
     private int numeroVisualizacoes;
 
+    public Historico() {}
 
-    public ConteudoUsuario() {
-    }
-
-
-    public ConteudoUsuario(Usuario usuario, Conteudo conteudo) {
+    public Historico(Usuario usuario, Conteudo conteudo) {
         this.usuario = usuario;
         this.conteudo = conteudo;
         this.favoritado = false;

@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "tags")
+@Table(name = "tag")
 public class Tag {
 
     @Id
@@ -19,7 +19,6 @@ public class Tag {
 
 
     // Getters And Setters
-
 
     public Long getId() {
         return id;
@@ -36,4 +35,5 @@ public class Tag {
     public void setNome(String nome) {
         this.nome = nome;
     }
+
 }

@@ -39,9 +39,8 @@ public class ConteudoService {
         conteudo.setTitulo(dto.getTitulo());
         conteudo.setDescricao(dto.getDescricao());
         conteudo.setCodStatus(dto.getCodStatus());
-        conteudo.setTipoConteudo(dto.getTipoConteudo());
-        conteudo.setArquivoUrl(dto.getArquivoUrl());
-        conteudo.setCaminhoMiniatura(dto.getCaminhoMiniatura());
+        conteudo.setFormato(dto.getFormato());
+        conteudo.setUrl(dto.getUrl());
         conteudo.setDataPublicacao(new Date());
 
         Set<ConstraintViolation<Conteudo>> violations = validator.validate(conteudo);
@@ -93,12 +92,11 @@ public class ConteudoService {
     public Conteudo atualizarConteudo(Long id, ConteudoRequestDTO dto) {
         Conteudo conteudoDb = conteudoRepository.findById(id).orElseThrow(() -> new NotFound("Conteúdo não encontrado com o id " + id));
 
-        conteudoDb.setCaminhoMiniatura(dto.getCaminhoMiniatura());
         conteudoDb.setTitulo(dto.getTitulo());
         conteudoDb.setDescricao(dto.getDescricao());
         conteudoDb.setCodStatus(dto.getCodStatus());
-        conteudoDb.setTipoConteudo(dto.getTipoConteudo());
-        conteudoDb.setArquivoUrl(dto.getArquivoUrl());
+        conteudoDb.setFormato(dto.getFormato());
+        conteudoDb.setUrl(dto.getUrl());
 
         // Validar
         Set<ConstraintViolation<Conteudo>> violations = validator.validate(conteudoDb);
@@ -152,12 +150,9 @@ public class ConteudoService {
         dto.setTitulo(conteudo.getTitulo());
         dto.setDescricao(conteudo.getDescricao());
         dto.setCodStatus(conteudo.getCodStatus());
-        dto.setTipoConteudo(conteudo.getTipoConteudo());
-        dto.setArquivoUrl(conteudo.getArquivoUrl());
-        dto.setCaminhoMiniatura(conteudo.getCaminhoMiniatura());
+        dto.setFormato(conteudo.getFormato());
+        dto.setUrl(conteudo.getUrl());
         dto.setDataPublicacao(conteudo.getDataPublicacao());
-
-
 
         List<String> categorias = conteudo.getCategorias().stream()
                 .map(cc -> cc.getCategoria().getNome())

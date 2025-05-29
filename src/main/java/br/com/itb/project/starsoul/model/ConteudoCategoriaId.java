@@ -14,5 +14,4 @@ public class ConteudoCategoriaId implements Serializable {
     private Conteudo conteudo;
     private Categoria categoria;
 
-
 }

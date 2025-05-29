@@ -5,25 +5,25 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "password_resets")
-public class PasswordReset {
+@Table(name = "redefinir_senha")
+public class RedefinirSenha {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String email;
+
     private String token;
 
-    @Column(name = "token_expiry")
-    private Date tokenExpiry;
+    @Column(name = "dataExpiracao")
+    private Date dataExpiracao;
 
-    @Column(name = "created_at")
-    private Date createdAt;
+    @Column(name = "dataCriacao")
+    private Date dataCriacao;
 
 
     // Getters And Setters
-
 
     public Long getId() {
         return id;
@@ -49,19 +49,20 @@ public class PasswordReset {
         this.token = token;
     }
 
-    public Date getTokenExpiry() {
-        return tokenExpiry;
+    public Date getdataExpiracao() {
+        return dataExpiracao;
     }
 
-    public void setTokenExpiry(Date tokenExpiry) {
-        this.tokenExpiry = tokenExpiry;
+    public void setDataExpiracao(Date dataExpiracao) {
+        this.dataExpiracao = dataExpiracao;
     }
 
-    public Date getCreatedAt() {
-        return createdAt;
+    public Date getDataCriacao() {
+        return dataCriacao;
     }
 
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
+    public void setDataCriacao(Date dataCriacao) {
+        this.dataCriacao = dataCriacao;
     }
+
 }

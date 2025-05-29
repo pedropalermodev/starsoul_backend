@@ -9,7 +9,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.util.Date;
 
 @Entity
-@Table(name = "feedbacks")
+@Table(name = "feedback")
 public class Feedback {
 
     @Id
@@ -43,7 +43,6 @@ public class Feedback {
 
 
     // Getter and Setters
-
 
     public Long getId() {
         return id;
@@ -92,4 +91,5 @@ public class Feedback {
     public void setDataEnvio(Date dataEnvio) {
         this.dataEnvio = dataEnvio;
     }
+
 }

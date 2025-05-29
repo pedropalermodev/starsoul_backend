@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.Date;
 
 @Entity
-@Table(name = "usuarios")
+@Table(name = "usuario")
 public class Usuario {
 
     @Id
@@ -31,7 +31,7 @@ public class Usuario {
     @Column(nullable = false, length = 255)
     @NotBlank(message = "A senha é obrigatória.")
     @Size(min = 8, message = "A senha deve ter pelo menos 8 caracteres.")
-    private String senhaHash;
+    private String senha;
 
     @Column(nullable = false, length = 30)
     @NotBlank(message = "A seleção do tipo de conta é obrigatório.")
@@ -58,7 +58,6 @@ public class Usuario {
 
     //Getters And Setters
 
-
     public Long getId() {
         return id;
     }
@@ -83,13 +82,9 @@ public class Usuario {
         this.email = email;
     }
 
-    public String getSenhaHash() {
-        return senhaHash;
-    }
+    public String getSenhaHash() { return senha; }
 
-    public void setSenhaHash(String senhaHash) {
-        this.senhaHash = senhaHash;
-    }
+    public void setSenhaHash(String senhaHash) { this.senha = senha; }
 
     public String getTipoConta() {
         return tipoConta;

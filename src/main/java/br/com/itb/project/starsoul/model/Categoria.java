@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 @Entity
-@Table(name = "categorias")
+@Table(name = "categoria")
 public class Categoria {
 
     @Id
@@ -23,14 +23,12 @@ public class Categoria {
 
     // Nullable
 
-
     @Column(nullable = true, length = 150)
     @Size(min = 10, message = "A descrição deve ter pelo menos 10 caracteres.")
     private String descricao;
 
 
     // Getters And Setters
-
 
     public Long getId() {
         return id;
@@ -63,4 +61,5 @@ public class Categoria {
     public void setDescricao(String descricao) {
         this.descricao = descricao;
     }
+
 }
