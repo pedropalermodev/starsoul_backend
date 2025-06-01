@@ -82,9 +82,9 @@ public class Usuario {
         this.email = email;
     }
 
-    public String getSenhaHash() { return senha; }
+    public String getSenha() { return senha; }
 
-    public void setSenhaHash(String senhaHash) { this.senha = senha; }
+    public void setSenha(String senha) { this.senha = senha; }
 
     public String getTipoConta() {
         return tipoConta;

@@ -69,7 +69,6 @@ public class UsuarioController {
     public ResponseEntity<Usuario> cadastrarUsuarioAdministrador(@RequestBody Usuario usuario, @RequestParam(value = "dataNascimento", required = false) String dataNascimentoStr) {
         try {
 
-            // Atualizando a classe Usuario Controller Testando novamente
             if(dataNascimentoStr != null && !dataNascimentoStr.isEmpty()) {
                 OffsetDateTime offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
                 LocalDate dataNascimento = offsetDateTime.toLocalDate();
@@ -115,8 +114,6 @@ public class UsuarioController {
     @PutMapping("{id}")
     public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @RequestBody Usuario usuarioAtualizado, @RequestParam(value = "dataNascimento", required = false) String dataNascimentoStr) {
         try {
-
-            // Atualizando classe Usuario Controller
             if (dataNascimentoStr != null && !dataNascimentoStr.isEmpty()) {
                 OffsetDateTime offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
                 LocalDate dataNascimento = offsetDateTime.toLocalDate();

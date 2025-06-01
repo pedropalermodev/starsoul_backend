@@ -8,8 +8,10 @@ import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,11 +20,13 @@ import java.util.Set;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
     private final Validator validator;
 
 
-    public UsuarioService(UsuarioRepository usuarioRepository, Validator validator) {
+    public UsuarioService(UsuarioRepository usuarioRepository, Validator validator, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
+        this.passwordEncoder = passwordEncoder;
         this.validator = validator;
     }
 
@@ -40,6 +44,10 @@ public class UsuarioService {
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
             return null;
         }
+
+        String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
+        usuario.setSenha(senhaCriptografada);
+
         usuario.setTipoConta("Usuário");
         usuario.setCodStatus("Ativo");
         return usuarioRepository.save(usuario);
@@ -96,6 +104,9 @@ public class UsuarioService {
             return null;
         }
 
+        String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
+        usuario.setSenha(senhaCriptografada);
+
         return usuarioRepository.save(usuario);
     }
 
@@ -111,6 +122,7 @@ public class UsuarioService {
     public Usuario atualizarUsuario(Long id, Usuario usuarioAtualizado) {
         Usuario usuarioDb = usuarioRepository.findById(id).orElseThrow(() -> new NotFound("Usuário não encontrado com o id " + id));
 
+
         Set<ConstraintViolation<Usuario>> violations = validator.validate(usuarioAtualizado);
         if (!violations.isEmpty()) {
             StringBuilder errorMessage = new StringBuilder();
@@ -125,9 +137,11 @@ public class UsuarioService {
             return null;
         }
 
+        String senhaCriptografada = passwordEncoder.encode(usuarioAtualizado.getSenha());
+
         usuarioDb.setNome(usuarioAtualizado.getNome());
         usuarioDb.setEmail(usuarioAtualizado.getEmail());
-        usuarioDb.setSenhaHash(usuarioAtualizado.getSenhaHash());
+        usuarioDb.setSenha(senhaCriptografada);
         usuarioDb.setCodStatus(usuarioAtualizado.getCodStatus());
         usuarioDb.setTipoConta(usuarioAtualizado.getTipoConta());
         usuarioDb.setApelido(usuarioAtualizado.getApelido());
