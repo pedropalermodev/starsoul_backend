@@ -2,6 +2,7 @@ package br.com.itb.project.starsoul.service;
 
 import br.com.itb.project.starsoul.exceptions.BadRequest;
 import br.com.itb.project.starsoul.model.Feedback;
+import br.com.itb.project.starsoul.model.Usuario;
 import br.com.itb.project.starsoul.repository.FeedbackRepository;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -24,11 +25,11 @@ public class FeedbackService {
     public Feedback criarFeedback(Feedback feedback) {
         Set<ConstraintViolation<Feedback>> violations = validator.validate(feedback);
         if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (ConstraintViolation<Feedback> violation : violations) {
-                errorMessage.append(violation.getMessage()).append("\n");
-            }
-            throw new BadRequest(errorMessage.toString());
+            String errorMessage = violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .reduce((msg1, msg2) -> msg1 + "\n" + msg2)
+                    .orElse("Erro de validação no feedback");
+            throw new BadRequest(errorMessage);
         }
 
         return feedbackRepository.save(feedback);

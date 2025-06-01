@@ -36,7 +36,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
 
-        // Permite requisições OPTIONS para CORS pré-flight
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             response.setStatus(HttpServletResponse.SC_OK);
             filterChain.doFilter(request, response);
@@ -50,19 +49,11 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = authorizationHeader.substring("Bearer ".length());
+        String token = authorizationHeader.substring("Bearer ".length()).trim();
 
         try {
-            // Validação do token
             Algorithm algorithm = Algorithm.HMAC256(secret);
             DecodedJWT decodedJWT = JWT.require(algorithm).build().verify(token);
-
-            // Verificação de expiração
-            if (decodedJWT.getExpiresAt().before(new Date())) {
-                sendError(response, HttpServletResponse.SC_UNAUTHORIZED,
-                        "expired_token", "Token expirado");
-                return;
-            }
 
             String username = decodedJWT.getSubject();
 
@@ -72,7 +63,6 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
                 return;
             }
 
-            // Carrega o usuário
             UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
             UsernamePasswordAuthenticationToken authentication =

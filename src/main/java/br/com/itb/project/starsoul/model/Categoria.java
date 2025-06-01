@@ -22,14 +22,11 @@ public class Categoria {
 
 
     // Nullable
-
     @Column(nullable = true, length = 150)
-    @Size(min = 10, message = "A descrição deve ter pelo menos 10 caracteres.")
     private String descricao;
 
 
     // Getters And Setters
-
     public Long getId() {
         return id;
     }

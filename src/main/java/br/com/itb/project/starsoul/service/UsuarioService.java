@@ -1,7 +1,9 @@
 package br.com.itb.project.starsoul.service;
 
 import br.com.itb.project.starsoul.exceptions.BadRequest;
+import br.com.itb.project.starsoul.exceptions.Conflict;
 import br.com.itb.project.starsoul.exceptions.NotFound;
+import br.com.itb.project.starsoul.model.Categoria;
 import br.com.itb.project.starsoul.model.Usuario;
 import br.com.itb.project.starsoul.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
@@ -10,7 +12,11 @@ import jakarta.validation.Validator;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.ZoneId;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -30,26 +36,49 @@ public class UsuarioService {
         this.validator = validator;
     }
 
-    public Usuario cadastrarNovoUsuarioPublico(Usuario usuario) throws BadRequest {
-
+    private void validarUsuario(Usuario usuario) {
         Set<ConstraintViolation<Usuario>> violations = validator.validate(usuario);
         if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (ConstraintViolation<Usuario> violation : violations) {
-                errorMessage.append(violation.getMessage()).append("\n");
-            }
-            throw new BadRequest(errorMessage.toString());
+            String errorMessage = violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .reduce((msg1, msg2) -> msg1 + "\n" + msg2)
+                    .orElse("Erro de validação no usuário");
+            throw new BadRequest(errorMessage);
+        }
+    }
+
+    private LocalDate validarEConverterDataNascimento(String dataNascimentoStr) {
+        OffsetDateTime offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
+        LocalDate dataNascimento = offsetDateTime.toLocalDate();
+        LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
+        LocalDate dataMinima = LocalDate.of(1911, 10, 6);
+
+        if (dataNascimento.isAfter(hoje)) {
+            throw new BadRequest("Data de nascimento não pode ser no futuro.");
         }
 
+        if (dataNascimento.isBefore(dataMinima)) {
+            throw new BadRequest("Data de nascimento muito antiga.");
+        }
+
+        return dataNascimento;
+    }
+
+    public Usuario cadastrarNovoUsuarioPublico(Usuario usuario) throws BadRequest {
+
+        usuario.setTipoConta("Usuário");
+        usuario.setCodStatus("Ativo");
+
+
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            return null;
+            throw new Conflict("Este e-mail já está cadastrado.");
         }
 
         String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
         usuario.setSenha(senhaCriptografada);
 
-        usuario.setTipoConta("Usuário");
-        usuario.setCodStatus("Ativo");
+        validarUsuario(usuario);
+
         return usuarioRepository.save(usuario);
     }
 
@@ -64,48 +93,38 @@ public class UsuarioService {
         Usuario usuarioDb = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new NotFound("Usuário não encontrado com o e-mail " + email));
 
+        usuarioDb.setApelido(usuarioAtualizado.getApelido());
+        usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
+        usuarioDb.setGenero(usuarioAtualizado.getGenero());
 
         if (usuarioAtualizado.getNome() != null && !usuarioAtualizado.getNome().isBlank()) {
             usuarioDb.setNome(usuarioAtualizado.getNome());
         }
 
         if (usuarioAtualizado.getEmail() != null && !usuarioAtualizado.getEmail().isBlank()) {
+            Optional<Usuario> usuarioComMesmoEmail = usuarioRepository.findByEmail(usuarioAtualizado.getEmail());
+            if (usuarioComMesmoEmail.isPresent() && !usuarioComMesmoEmail.get().getId().equals(usuarioDb.getId())) {
+                throw new Conflict("Este e-mail já está cadastrado por outro usuário.");
+            }
             usuarioDb.setEmail(usuarioAtualizado.getEmail());
         }
 
-        usuarioDb.setApelido(usuarioAtualizado.getApelido());
-        usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
-        usuarioDb.setGenero(usuarioAtualizado.getGenero());
-
-
-        Set<ConstraintViolation<Usuario>> violations = validator.validate(usuarioDb);
-        if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder("Erros de validação ao salvar:\n");
-            for (ConstraintViolation<Usuario> violation : violations) {
-                errorMessage.append(violation.getMessage()).append("\n");
-            }
-            throw new BadRequest(errorMessage.toString());
-        }
+        validarUsuario(usuarioDb);
 
         return usuarioRepository.save(usuarioDb);
     }
 
-    public Usuario cadastrarUsuario(Usuario usuario) {
-        Set<ConstraintViolation<Usuario>> violations = validator.validate(usuario);
-        if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (ConstraintViolation<Usuario> violation : violations) {
-                errorMessage.append(violation.getMessage()).append("\n");
-            }
-            throw new BadRequest(errorMessage.toString());
-        }
+    public Usuario cadastrarUsuario(Usuario usuario, String dataNascimentoStr) {
 
         if (usuarioRepository.existsByEmail(usuario.getEmail())) {
-            return null;
+            throw new Conflict("Este e-mail já está cadastrado.");
         }
 
         String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
         usuario.setSenha(senhaCriptografada);
+
+        validarEConverterDataNascimento(dataNascimentoStr);
+        validarUsuario(usuario);
 
         return usuarioRepository.save(usuario);
     }
@@ -119,34 +138,30 @@ public class UsuarioService {
     }
 
     @Transactional
-    public Usuario atualizarUsuario(Long id, Usuario usuarioAtualizado) {
-        Usuario usuarioDb = usuarioRepository.findById(id).orElseThrow(() -> new NotFound("Usuário não encontrado com o id " + id));
-
-
-        Set<ConstraintViolation<Usuario>> violations = validator.validate(usuarioAtualizado);
-        if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (ConstraintViolation<Usuario> violation : violations) {
-                errorMessage.append(violation.getMessage()).append("\n");
-            }
-            throw new BadRequest(errorMessage.toString());
-        }
-
-        Optional<Usuario> usuarioComMesmoEmail = usuarioRepository.findByEmail(usuarioAtualizado.getEmail());
-        if (usuarioComMesmoEmail.isPresent() && !usuarioComMesmoEmail.get().getId().equals(id)) {
-            return null;
-        }
-
-        String senhaCriptografada = passwordEncoder.encode(usuarioAtualizado.getSenha());
+    public Usuario atualizarUsuario(Long id, Usuario usuarioAtualizado, String dataNascimentoStr) {
+        Usuario usuarioDb = usuarioRepository.findById(id)
+                .orElseThrow(() -> new NotFound("Usuário não encontrado com o id " + id));
 
         usuarioDb.setNome(usuarioAtualizado.getNome());
         usuarioDb.setEmail(usuarioAtualizado.getEmail());
-        usuarioDb.setSenha(senhaCriptografada);
         usuarioDb.setCodStatus(usuarioAtualizado.getCodStatus());
         usuarioDb.setTipoConta(usuarioAtualizado.getTipoConta());
         usuarioDb.setApelido(usuarioAtualizado.getApelido());
         usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
         usuarioDb.setGenero(usuarioAtualizado.getGenero());
+
+        if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isBlank()) {
+            String senhaCriptografada = passwordEncoder.encode(usuarioAtualizado.getSenha());
+            usuarioDb.setSenha(senhaCriptografada);
+        }
+
+        Optional<Usuario> usuarioComMesmoEmail = usuarioRepository.findByEmail(usuarioAtualizado.getEmail());
+        if (usuarioComMesmoEmail.isPresent() && !usuarioComMesmoEmail.get().getId().equals(id)) {
+            throw new Conflict("Este email já está cadastrado por outro usuário.");
+        }
+
+        validarEConverterDataNascimento(dataNascimentoStr);
+        validarUsuario(usuarioDb);
 
         return usuarioRepository.save(usuarioDb);
     }

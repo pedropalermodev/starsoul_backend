@@ -1,8 +1,5 @@
 package br.com.itb.project.starsoul.controller;
 
-
-import br.com.itb.project.starsoul.exceptions.BadRequest;
-import br.com.itb.project.starsoul.exceptions.TagJaCadastradaException;
 import br.com.itb.project.starsoul.model.Tag;
 import br.com.itb.project.starsoul.service.TagService;
 import org.springframework.http.HttpStatus;
@@ -11,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/tags")
 public class TagController {
@@ -24,14 +20,8 @@ public class TagController {
 
     @PostMapping
     public ResponseEntity<Tag> criarTag(@RequestBody Tag tag) {
-        try {
-            Tag novoTag = tagService.criarTag(tag);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novoTag);
-        } catch (TagJaCadastradaException e) {
-            return new ResponseEntity<>(HttpStatus.CONFLICT);
-        } catch (BadRequest e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+        Tag novoTag = tagService.criarTag(tag);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novoTag);
     }
 
     @GetMapping("{id}")

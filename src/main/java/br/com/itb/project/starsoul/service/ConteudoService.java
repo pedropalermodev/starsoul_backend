@@ -1,11 +1,13 @@
 package br.com.itb.project.starsoul.service;
 
-import br.com.itb.project.starsoul.dto.ConteudoRequestDTO;
-import br.com.itb.project.starsoul.dto.ConteudoResponseDTO;
+import br.com.itb.project.starsoul.dto.content.ConteudoRequestDTO;
+import br.com.itb.project.starsoul.dto.content.ConteudoResponseDTO;
 import br.com.itb.project.starsoul.exceptions.BadRequest;
+import br.com.itb.project.starsoul.exceptions.Conflict;
 import br.com.itb.project.starsoul.exceptions.NotFound;
 import br.com.itb.project.starsoul.model.*;
 import br.com.itb.project.starsoul.repository.CategoriaRepository;
+import br.com.itb.project.starsoul.repository.ConteudoCategoriaRepository;
 import br.com.itb.project.starsoul.repository.ConteudoRepository;
 import br.com.itb.project.starsoul.repository.TagRepository;
 import jakarta.transaction.Transactional;
@@ -26,15 +28,49 @@ public class ConteudoService {
     private final TagRepository tagRepository;
     private final CategoriaRepository categoriaRepository;
 
-    public ConteudoService(ConteudoRepository conteudoRepository, Validator validator, TagRepository tagRepository, CategoriaRepository categoriaRepository) {
+    public ConteudoService(
+            ConteudoRepository conteudoRepository,
+            Validator validator,
+            TagRepository tagRepository,
+            CategoriaRepository categoriaRepository
+    ) {
         this.conteudoRepository = conteudoRepository;
         this.validator = validator;
         this.tagRepository = tagRepository;
         this.categoriaRepository = categoriaRepository;
     }
 
-    public Conteudo criarConteudo(ConteudoRequestDTO dto) {
+    private void validarConteudo(Conteudo conteudo) {
+        Set<ConstraintViolation<Conteudo>> violations = validator.validate(conteudo);
+        if (!violations.isEmpty()) {
+            String errorMessage = violations.stream()
+                    .map(ConstraintViolation::getMessage)
+                    .reduce((msg1, msg2) -> msg1 + "\n" + msg2)
+                    .orElse("Erro de validação no conteúdo");
+            throw new BadRequest(errorMessage);
+        }
+    }
 
+    private List<ConteudoCategoria> mapCategorias(Conteudo conteudo, List<Long> categoriaIds) {
+        return categoriaIds.stream()
+                .map(id -> {
+                    Categoria categoria = categoriaRepository.findById(id)
+                            .orElseThrow(() -> new NotFound("Categoria não encontrada com ID: " + id));
+                    return new ConteudoCategoria(conteudo, categoria);
+                }).toList();
+    }
+
+    private List<ConteudoTag> mapTags(Conteudo conteudo, List<Long> tagIds) {
+        return tagIds.stream()
+                .map(id -> {
+                    Tag tag = tagRepository.findById(id)
+                            .orElseThrow(() -> new NotFound("Tag não encontrada com ID: " + id));
+                    return new ConteudoTag(conteudo, tag);
+                }).toList();
+    }
+
+
+    public Conteudo criarConteudo(ConteudoRequestDTO dto) {
         final Conteudo conteudo = new Conteudo();
         conteudo.setTitulo(dto.getTitulo());
         conteudo.setDescricao(dto.getDescricao());
@@ -43,45 +79,30 @@ public class ConteudoService {
         conteudo.setUrl(dto.getUrl());
         conteudo.setDataPublicacao(new Date());
 
-        Set<ConstraintViolation<Conteudo>> violations = validator.validate(conteudo);
-        if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (ConstraintViolation<Conteudo> violation : violations) {
-                errorMessage.append(violation.getMessage()).append("\n");
-            }
-            throw new BadRequest(errorMessage.toString());
-        }
 
-        conteudoRepository.save(conteudo);
-
-        if (dto.getCategoriaIds() != null && !dto.getCategoriaIds().isEmpty()) {
-            List<ConteudoCategoria> conteudoCategorias = dto.getCategoriaIds().stream()
-                    .map(categoriaId -> {
-                        Categoria categoria = categoriaRepository.findById(categoriaId)
-                                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com ID: " + categoriaId));
-                        return new ConteudoCategoria(conteudo, categoria);
-                    }).collect(Collectors.toList());
-            conteudo.getCategorias().addAll(conteudoCategorias);
-        }
-
+        // Relacionamentos com Categorias
+        conteudo.getCategorias().addAll(
+                dto.getCategoriaIds() != null ? mapCategorias(conteudo, dto.getCategoriaIds()) : List.of()
+        );
 
         // Relacionamentos com Tags
-        if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
-            List<ConteudoTag> conteudoTags = dto.getTagIds().stream()
-                    .map(tagId -> {
-                        Tag tag = tagRepository.findById(tagId)
-                                .orElseThrow(() -> new RuntimeException("Tag não encontrada com ID: " + tagId));
-                        return new ConteudoTag(conteudo, tag);
-                    }).collect(Collectors.toList());
-            conteudo.getTags().addAll(conteudoTags);
+        conteudo.getTags().addAll(
+                dto.getTagIds() != null ? mapTags(conteudo, dto.getTagIds()) : List.of()
+        );
+
+        if (conteudoRepository.existsByTitulo(conteudo.getTitulo()) || conteudoRepository.existsByUrl(conteudo.getUrl())) {
+            throw new Conflict("Este conteúdo já está cadastrado.");
         }
+
+        validarConteudo(conteudo);
 
         return conteudoRepository.save(conteudo);
     }
 
 
     public Conteudo listarConteudo(Long id) {
-        return conteudoRepository.findById(id).orElseThrow(() -> new NotFound("Conteúdo não encontrado com o id " + id));
+        return conteudoRepository.findById(id)
+                .orElseThrow(() -> new NotFound("Conteúdo não encontrado com o ID " + id));
     }
 
     public List<Conteudo> listarTodosConteudos() {
@@ -90,7 +111,8 @@ public class ConteudoService {
 
     @Transactional
     public Conteudo atualizarConteudo(Long id, ConteudoRequestDTO dto) {
-        Conteudo conteudoDb = conteudoRepository.findById(id).orElseThrow(() -> new NotFound("Conteúdo não encontrado com o id " + id));
+        Conteudo conteudoDb = conteudoRepository.findById(id)
+                .orElseThrow(() -> new NotFound("Conteúdo não encontrado com o ID " + id));
 
         conteudoDb.setTitulo(dto.getTitulo());
         conteudoDb.setDescricao(dto.getDescricao());
@@ -98,39 +120,24 @@ public class ConteudoService {
         conteudoDb.setFormato(dto.getFormato());
         conteudoDb.setUrl(dto.getUrl());
 
-        // Validar
-        Set<ConstraintViolation<Conteudo>> violations = validator.validate(conteudoDb);
-        if (!violations.isEmpty()) {
-            StringBuilder errorMessage = new StringBuilder();
-            for (ConstraintViolation<Conteudo> violation : violations) {
-                errorMessage.append(violation.getMessage()).append("\n");
-            }
-            throw new BadRequest(errorMessage.toString());
-        }
-
-        // Atualizar Categorias
+        // Atualizar categorias
         conteudoDb.getCategorias().clear();
-        if (dto.getCategoriaIds() != null && !dto.getCategoriaIds().isEmpty()) {
-            List<ConteudoCategoria> novasCategorias = dto.getCategoriaIds().stream()
-                    .map(categoriaId -> {
-                        Categoria categoria = categoriaRepository.findById(categoriaId)
-                                .orElseThrow(() -> new RuntimeException("Categoria não encontrada com ID: " + categoriaId));
-                        return new ConteudoCategoria(conteudoDb, categoria);
-                    }).collect(Collectors.toList());
-            conteudoDb.getCategorias().addAll(novasCategorias);
+        conteudoDb.getCategorias().addAll(
+                dto.getCategoriaIds() != null ? mapCategorias(conteudoDb, dto.getCategoriaIds()) : List.of()
+        );
+
+        // Atualizar tags
+        conteudoDb.getTags().clear();
+        conteudoDb.getTags().addAll(
+                dto.getTagIds() != null ? mapTags(conteudoDb, dto.getTagIds()) : List.of()
+        );
+
+        if ((!conteudoDb.getTitulo().equals(dto.getTitulo()) && conteudoRepository.existsByTitulo(dto.getTitulo())) ||
+                (!conteudoDb.getUrl().equals(dto.getUrl()) && conteudoRepository.existsByUrl(dto.getUrl()))) {
+            throw new Conflict("Este conteúdo já está cadastrado.");
         }
 
-        // Atualizar Tags
-        conteudoDb.getTags().clear();
-        if (dto.getTagIds() != null && !dto.getTagIds().isEmpty()) {
-            List<ConteudoTag> novasTags = dto.getTagIds().stream()
-                    .map(tagId -> {
-                        Tag tag = tagRepository.findById(tagId)
-                                .orElseThrow(() -> new RuntimeException("Tag não encontrada com ID: " + tagId));
-                        return new ConteudoTag(conteudoDb, tag);
-                    }).collect(Collectors.toList());
-            conteudoDb.getTags().addAll(novasTags);
-        }
+        validarConteudo(conteudoDb);
 
         return conteudoRepository.save(conteudoDb);
     }
@@ -139,7 +146,7 @@ public class ConteudoService {
     @Transactional
     public void deletarConteudo(Long id) {
         if (!conteudoRepository.existsById(id)) {
-            throw new NotFound("Conteúdo não encontrado com o id " + id);
+            throw new NotFound("Conteúdo não encontrado com o ID " + id);
         }
         conteudoRepository.deleteById(id);
     }

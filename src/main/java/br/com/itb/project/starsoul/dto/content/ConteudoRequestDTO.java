@@ -1,4 +1,4 @@
-package br.com.itb.project.starsoul.dto;
+package br.com.itb.project.starsoul.dto.content;
 
 import java.util.ArrayList;
 import java.util.List;

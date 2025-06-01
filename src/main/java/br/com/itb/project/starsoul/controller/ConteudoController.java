@@ -1,9 +1,7 @@
 package br.com.itb.project.starsoul.controller;
 
-
-import br.com.itb.project.starsoul.dto.ConteudoRequestDTO;
-import br.com.itb.project.starsoul.dto.ConteudoResponseDTO;
-import br.com.itb.project.starsoul.exceptions.NotFound;
+import br.com.itb.project.starsoul.dto.content.ConteudoRequestDTO;
+import br.com.itb.project.starsoul.dto.content.ConteudoResponseDTO;
 import br.com.itb.project.starsoul.model.Conteudo;
 import br.com.itb.project.starsoul.repository.ConteudoRepository;
 import br.com.itb.project.starsoul.service.ConteudoService;
@@ -13,17 +11,14 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@CrossOrigin(origins = "*", allowedHeaders = "*")
 @RestController
 @RequestMapping("/api/conteudos")
 public class ConteudoController {
 
     final ConteudoService conteudoService;
-    private final ConteudoRepository conteudoRepository;
 
     public ConteudoController(ConteudoService conteudoService, ConteudoRepository conteudoRepository) {
         this.conteudoService = conteudoService;
-        this.conteudoRepository = conteudoRepository;
     }
 
     @PostMapping
@@ -34,10 +29,8 @@ public class ConteudoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ConteudoResponseDTO> getConteudo(@PathVariable Long id) {
-        Conteudo conteudo = conteudoRepository.findById(id)
-                .orElseThrow(() -> new NotFound("Conteúdo não encontrado"));
-
+    public ResponseEntity<ConteudoResponseDTO> listarConteudo(@PathVariable Long id) {
+        Conteudo conteudo = conteudoService.listarConteudo(id);
         ConteudoResponseDTO dto = conteudoService.toDto(conteudo);
         return ResponseEntity.ok(dto);
     }
@@ -50,13 +43,15 @@ public class ConteudoController {
         return ResponseEntity.ok(dtos);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<Conteudo> atualizarConteudo(@PathVariable Long id, @RequestBody ConteudoRequestDTO conteudoAtualizado) {
+    @PutMapping("/{id}")
+    public ResponseEntity<ConteudoResponseDTO> atualizarConteudo(@PathVariable Long id, @RequestBody ConteudoRequestDTO conteudoAtualizado) {
         Conteudo conteudo = conteudoService.atualizarConteudo(id, conteudoAtualizado);
-        return ResponseEntity.ok(conteudo);
+        ConteudoResponseDTO dto = conteudoService.toDto(conteudo);
+        return ResponseEntity.ok(dto);
     }
 
-    @DeleteMapping("{id}")
+
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarConteudo(@PathVariable Long id) {
         conteudoService.deletarConteudo(id);
         return ResponseEntity.noContent().build();

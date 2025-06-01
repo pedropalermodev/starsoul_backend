@@ -49,7 +49,7 @@ public class RedefinirSenha {
         this.token = token;
     }
 
-    public Date getdataExpiracao() {
+    public Date getDataExpiracao() {
         return dataExpiracao;
     }
 

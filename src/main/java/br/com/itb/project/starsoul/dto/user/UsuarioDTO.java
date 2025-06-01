@@ -1,4 +1,4 @@
-package br.com.itb.project.starsoul.dto;
+package br.com.itb.project.starsoul.dto.user;
 
 import br.com.itb.project.starsoul.model.Usuario;
 

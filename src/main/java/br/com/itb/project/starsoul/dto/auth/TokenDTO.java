@@ -1,4 +1,4 @@
-package br.com.itb.project.starsoul.dto;
+package br.com.itb.project.starsoul.dto.auth;
 
 public class TokenDTO {
     private String token;

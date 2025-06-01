@@ -43,7 +43,6 @@ public class AppExceptionHandler {
     }
 
     // Error : 404
-
     @ExceptionHandler(value = {NotFound.class})
     public ResponseEntity<Object> notFoundException(NotFound ex, WebRequest request) {
         LocalDateTime localDateTimeBrasil = LocalDateTime.now(zoneIdBrasil);
@@ -56,5 +55,17 @@ public class AppExceptionHandler {
         return new ResponseEntity<>(errorMessage, HttpStatus.NOT_FOUND);
     }
 
+    // Error: 409
+    @ExceptionHandler(value = {Conflict.class})
+    public ResponseEntity<Object> conflictException(Conflict ex, WebRequest request) {
+        LocalDateTime localDateTimeBrasil = LocalDateTime.now(zoneIdBrasil);
+        String errorMessageDescription = ex.getLocalizedMessage();
+        System.out.println(errorMessageDescription);
+        if (errorMessageDescription == null) errorMessageDescription = ex.toString();
+        arrayMessage = errorMessageDescription.split(":");
+        ErrorMessage errorMessage = new ErrorMessage(localDateTimeBrasil, arrayMessage, HttpStatus.CONFLICT);
+
+        return new ResponseEntity<>(errorMessage, HttpStatus.CONFLICT);
+    }
 
 }

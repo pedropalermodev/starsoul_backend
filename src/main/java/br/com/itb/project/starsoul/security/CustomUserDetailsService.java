@@ -20,6 +20,10 @@ public class CustomUserDetailsService implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com o email: " + email));
 
+        if (!"Ativo".equalsIgnoreCase(usuario.getCodStatus())) {
+            throw new UsernameNotFoundException("Usuário não está ativo");
+        }
+
         return User.builder()
                 .username(usuario.getEmail())
                 .password(usuario.getSenha())
