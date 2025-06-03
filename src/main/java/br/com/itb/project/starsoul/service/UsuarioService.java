@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeParseException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Optional;
@@ -48,7 +49,18 @@ public class UsuarioService {
     }
 
     private LocalDate validarEConverterDataNascimento(String dataNascimentoStr) {
-        OffsetDateTime offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
+        if (dataNascimentoStr == null || dataNascimentoStr.isBlank()) {
+            // Pode ser null — apenas retorna null (sem erro)
+            return null;
+        }
+
+        OffsetDateTime offsetDateTime;
+        try {
+            offsetDateTime = OffsetDateTime.parse(dataNascimentoStr);
+        } catch (DateTimeParseException e) {
+            throw new BadRequest("Formato inválido para data de nascimento.");
+        }
+
         LocalDate dataNascimento = offsetDateTime.toLocalDate();
         LocalDate hoje = LocalDate.now(ZoneId.of("America/Sao_Paulo"));
         LocalDate dataMinima = LocalDate.of(1911, 10, 6);
@@ -63,6 +75,7 @@ public class UsuarioService {
 
         return dataNascimento;
     }
+
 
     public Usuario cadastrarNovoUsuarioPublico(Usuario usuario) throws BadRequest {
 
@@ -123,8 +136,12 @@ public class UsuarioService {
         String senhaCriptografada = passwordEncoder.encode(usuario.getSenha());
         usuario.setSenha(senhaCriptografada);
 
-        validarEConverterDataNascimento(dataNascimentoStr);
+        LocalDate dataNascimento = validarEConverterDataNascimento(dataNascimentoStr);
+        if (dataNascimento != null) {
+            usuario.setDataNascimento(dataNascimento);
+        }
         validarUsuario(usuario);
+
 
         return usuarioRepository.save(usuario);
     }
@@ -147,8 +164,9 @@ public class UsuarioService {
         usuarioDb.setCodStatus(usuarioAtualizado.getCodStatus());
         usuarioDb.setTipoConta(usuarioAtualizado.getTipoConta());
         usuarioDb.setApelido(usuarioAtualizado.getApelido());
-        usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
         usuarioDb.setGenero(usuarioAtualizado.getGenero());
+        usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
+
 
         if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isBlank()) {
             String senhaCriptografada = passwordEncoder.encode(usuarioAtualizado.getSenha());
@@ -160,7 +178,6 @@ public class UsuarioService {
             throw new Conflict("Este email já está cadastrado por outro usuário.");
         }
 
-        validarEConverterDataNascimento(dataNascimentoStr);
         validarUsuario(usuarioDb);
 
         return usuarioRepository.save(usuarioDb);
