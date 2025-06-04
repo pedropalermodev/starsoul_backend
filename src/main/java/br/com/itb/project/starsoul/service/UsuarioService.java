@@ -168,11 +168,6 @@ public class UsuarioService {
         usuarioDb.setDataNascimento(usuarioAtualizado.getDataNascimento());
 
 
-        if (usuarioAtualizado.getSenha() != null && !usuarioAtualizado.getSenha().isBlank()) {
-            String senhaCriptografada = passwordEncoder.encode(usuarioAtualizado.getSenha());
-            usuarioDb.setSenha(senhaCriptografada);
-        }
-
         Optional<Usuario> usuarioComMesmoEmail = usuarioRepository.findByEmail(usuarioAtualizado.getEmail());
         if (usuarioComMesmoEmail.isPresent() && !usuarioComMesmoEmail.get().getId().equals(id)) {
             throw new Conflict("Este email já está cadastrado por outro usuário.");
