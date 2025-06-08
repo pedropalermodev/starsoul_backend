@@ -25,8 +25,7 @@ public class Historico {
 
     private boolean favoritado;
 
-    @CreationTimestamp
-    @Column(name = "dataUltimoAcesso", nullable = false, updatable = false)
+    @Column(name = "dataUltimoAcesso", nullable = false)
     private LocalDateTime dataUltimoAcesso;
 
     @Column(name = "numeroVisualizacoes")
