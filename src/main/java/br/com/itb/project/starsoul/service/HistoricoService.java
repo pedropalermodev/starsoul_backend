@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class HistoricoService {
@@ -43,12 +44,19 @@ public class HistoricoService {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
         Conteudo conteudo = buscarConteudoPorId(conteudoId);
 
-        Historico relacao = historicoRepository
-                .findByUsuarioAndConteudo(usuario, conteudo)
-                .orElse(new Historico(usuario, conteudo));
+        Optional<Historico> historicoExistente = historicoRepository.findByUsuarioAndConteudo(usuario, conteudo);
+        Historico relacao;
 
-        relacao.setNumeroVisualizacoes(relacao.getNumeroVisualizacoes() + 1);
-        relacao.setDataUltimoAcesso(LocalDateTime.now());
+        if (historicoExistente.isPresent()) {
+            relacao = historicoExistente.get();
+            relacao.setNumeroVisualizacoes(relacao.getNumeroVisualizacoes() + 1);
+            relacao.setDataUltimoAcesso(LocalDateTime.now());
+        } else {
+            relacao = new Historico(usuario, conteudo);
+            relacao.setNumeroVisualizacoes(1);
+            relacao.setFavoritado(false);
+            relacao.setDataUltimoAcesso(LocalDateTime.now());
+        }
 
         return historicoRepository.save(relacao);
     }
@@ -57,10 +65,16 @@ public class HistoricoService {
         Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
         Conteudo conteudo = buscarConteudoPorId(conteudoId);
 
-        Historico relacao = historicoRepository
-                .findByUsuarioAndConteudo(usuario, conteudo)
-                .orElse(new Historico(usuario, conteudo));
+        Optional<Historico> historicoExistente = historicoRepository.findByUsuarioAndConteudo(usuario, conteudo);
+        Historico relacao;
 
+        if (historicoExistente.isPresent()) {
+            relacao = historicoExistente.get();
+        } else {
+            relacao = new Historico(usuario, conteudo);
+            relacao.setNumeroVisualizacoes(0);
+            relacao.setDataUltimoAcesso(LocalDateTime.now());
+        }
         relacao.setFavoritado(true);
 
         return historicoRepository.save(relacao);
