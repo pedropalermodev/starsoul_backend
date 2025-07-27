@@ -46,19 +46,17 @@ public class AuthService {
 
     @jakarta.annotation.PostConstruct
     public void init() throws GeneralSecurityException {
+        try {
+            byte[] decodedKey = Base64.getDecoder().decode(privateKeyPem);
 
-        String pkcs8Pem = privateKeyPem
-                .replace("-----BEGIN EC PRIVATE KEY-----", "")
-                .replace("-----END EC PRIVATE KEY-----", "")
-                .replaceAll("\\s", "");
+            KeyFactory keyFactory = KeyFactory.getInstance("EC");
+            PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
+            ECPrivateKey privateKey = (ECPrivateKey) keyFactory.generatePrivate(keySpec);
 
-        byte[] decodedKey = Base64.getDecoder().decode(pkcs8Pem);
-
-        KeyFactory keyFactory = KeyFactory.getInstance("EC");
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
-        ECPrivateKey privateKey = (ECPrivateKey) keyFactory.generatePrivate(keySpec);
-
-        this.algorithm = Algorithm.ECDSA256(privateKey);
+            this.algorithm = Algorithm.ECDSA256(null, privateKey); // CORRIGIDO
+        } catch (Exception e) {
+            throw new GeneralSecurityException("Erro ao inicializar chave privada ES256", e);
+        }
     }
 
 
