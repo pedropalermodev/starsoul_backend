@@ -18,11 +18,11 @@ public class Daily {
     @JoinColumn(name = "usuarioId", nullable = false)
     private Usuario usuario;
 
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank(message = "O humor é obrigatório.")
     private String humor;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     @NotBlank(message = "A anotação é obrigatório.")
     private String anotacao;
 
