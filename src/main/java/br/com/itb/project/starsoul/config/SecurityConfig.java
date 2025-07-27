@@ -38,6 +38,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/feedbacks").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/conteudos/findAll").permitAll()
                         .requestMatchers("/api/conteudo-usuario/**").hasRole("Usuário")
+                        .requestMatchers("/api/anotacoes/**").hasRole("Usuário")
                         .requestMatchers("/api/usuarios/me").authenticated()
                         .requestMatchers("/api/**").hasRole("Administrador")
                         .anyRequest().authenticated())
