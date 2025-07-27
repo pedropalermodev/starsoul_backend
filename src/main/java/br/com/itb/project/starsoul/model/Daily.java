@@ -14,6 +14,10 @@ public class Daily {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuarioId", nullable = false)
+    private Usuario usuario;
+
     @Column(nullable = false, length = 10)
     @NotBlank(message = "O humor é obrigatório.")
     private String humor;
@@ -36,6 +40,14 @@ public class Daily {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
     }
 
     public String getHumor() {

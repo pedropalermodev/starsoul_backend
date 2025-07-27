@@ -53,11 +53,12 @@ public class AuthService {
             PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
             ECPrivateKey privateKey = (ECPrivateKey) keyFactory.generatePrivate(keySpec);
 
-            this.algorithm = Algorithm.ECDSA256(null, privateKey); // CORRIGIDO
+            this.algorithm = Algorithm.ECDSA256(null, privateKey);
         } catch (Exception e) {
             throw new GeneralSecurityException("Erro ao inicializar chave privada ES256", e);
         }
     }
+
 
 
     public String autenticar(String email, String password) {
