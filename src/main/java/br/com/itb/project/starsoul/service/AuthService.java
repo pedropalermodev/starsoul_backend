@@ -10,6 +10,12 @@ import org.springframework.stereotype.Service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import java.security.interfaces.ECPrivateKey; // Importe ECPrivateKey
+import java.security.KeyFactory; // Importe KeyFactory
+import java.security.spec.PKCS8EncodedKeySpec; // Importe PKCS8EncodedKeySpec
+import java.util.Base64; // Importe Base64
+import java.security.GeneralSecurityException; // Importe GeneralSecurityException para tratamento de erros
+
 import java.util.Date;
 
 @Service
@@ -18,11 +24,16 @@ public class AuthService {
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${jwt.secret}")
-    private String secret;
+    @Value("${jwt.es256.private-key}")
+    private String privateKeyPem;
+
+    @Value("${jwt.es256.key-id}")
+    private String keyId;
 
     @Value("${jwt.expiration}")
     private long expiration;
+
+    private Algorithm algorithm;
 
     public AuthService(
             UsuarioRepository usuarioRepository,
@@ -33,25 +44,41 @@ public class AuthService {
     }
 
 
+    @jakarta.annotation.PostConstruct
+    public void init() throws GeneralSecurityException {
+
+        String pkcs8Pem = privateKeyPem
+                .replace("-----BEGIN EC PRIVATE KEY-----", "")
+                .replace("-----END EC PRIVATE KEY-----", "")
+                .replaceAll("\\s", "");
+
+        byte[] decodedKey = Base64.getDecoder().decode(pkcs8Pem);
+
+        KeyFactory keyFactory = KeyFactory.getInstance("EC");
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(decodedKey);
+        ECPrivateKey privateKey = (ECPrivateKey) keyFactory.generatePrivate(keySpec);
+
+        this.algorithm = Algorithm.ECDSA256(privateKey);
+    }
+
+
     public String autenticar(String email, String password) {
         Usuario usuario = usuarioRepository.findByEmail(email).orElse(null);
 
-        if (!usuario.getCodStatus().equalsIgnoreCase("Ativo") || !passwordEncoder.matches(password, usuario.getSenha())) {
+        if (usuario == null || !usuario.getCodStatus().equalsIgnoreCase("Ativo") || !passwordEncoder.matches(password, usuario.getSenha())) {
             throw new BadRequest("Email ou senha inválidos");
         }
 
         return gerarToken(usuario);
     }
 
-
     public String gerarToken(Usuario usuario) {
-        Algorithm algorithm = Algorithm.HMAC256(secret);
         return JWT.create()
+                .withKeyId(keyId)
                 .withSubject(usuario.getEmail())
                 .withClaim("role", usuario.getTipoConta())
                 .withIssuedAt(new Date())
                 .withExpiresAt(new Date(System.currentTimeMillis() + expiration * 1000))
                 .sign(algorithm);
     }
-
 }
