@@ -4,6 +4,7 @@ import br.com.itb.project.starsoul.model.Daily;
 import br.com.itb.project.starsoul.service.DailyService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,33 +20,32 @@ public class DailyController {
     }
 
     @PostMapping("/cadastrar")
-    public ResponseEntity<Daily> cadastrarAnotacao(@RequestBody Daily anotacao) {
-        Daily novaAnotacao = dailyService.cadastrarAnotacao(anotacao);
+    public ResponseEntity<Daily> cadastrarAnotacao(@RequestBody Daily anotacao, Authentication authentication) {
+        String email = authentication.getName();
+        Daily novaAnotacao = dailyService.cadastrarAnotacao(anotacao, email);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaAnotacao);
     }
 
-    @GetMapping("{id}")
-    public ResponseEntity<Daily> listarAnotacao(@PathVariable Long id) {
-        Daily anotacao = dailyService.listarAnotacao(id);
+    @GetMapping("/me/{id}")
+    public ResponseEntity<Daily> listarMinhaAnotacao(@PathVariable Long id, Authentication authentication) {
+        String email = authentication.getName();
+        Daily anotacao = dailyService.listarAnotacao(id, email);
         return ResponseEntity.ok(anotacao);
     }
 
-    @GetMapping("/findAll")
-    public ResponseEntity<List<Daily>> listarTodasAnotacoes() {
-        List<Daily> anotacoes = dailyService.listarTodasAnotacoes();
-        return ResponseEntity.ok(anotacoes);
-    }
-
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<List<Daily>> listarPorUsuario(@PathVariable Long usuarioId) {
-        return ResponseEntity.ok(dailyService.listarPorUsuario(usuarioId));
+    @GetMapping("/me")
+    public ResponseEntity<List<Daily>> listarMinhasAnotacoes(Authentication authentication) {
+        String email = authentication.getName();
+        return ResponseEntity.ok(dailyService.listarPorUsuarioEmail(email));
     }
 
 
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deletarAnotacao(@PathVariable Long id) {
-        dailyService.deletarAnotacao(id);
+    public ResponseEntity<Void> deletarAnotacao(@PathVariable Long id, Authentication authentication) {
+        String email = authentication.getName();
+        dailyService.deletarAnotacao(id, email);
         return ResponseEntity.noContent().build();
     }
+
 
 }

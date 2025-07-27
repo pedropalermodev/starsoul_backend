@@ -49,37 +49,45 @@ public class DailyService {
         }
     }
 
-    public Daily cadastrarAnotacao(Daily anotacao) {
+    private Usuario buscarUsuarioPorEmail(String email) {
+        return usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new NotFound("Usuário não encontrado"));
+    }
+
+    public Daily cadastrarAnotacao(Daily anotacao, String emailUsuario) {
         validarAnotacao(anotacao);
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        anotacao.setUsuario(usuario);
+        anotacao.setHumor(encryptor.encrypt(anotacao.getHumor()));
         anotacao.setAnotacao(encryptor.encrypt(anotacao.getAnotacao()));
         return dailyRepository.save(anotacao);
     }
 
-    public Daily listarAnotacao(Long id) {
-        Daily a = dailyRepository.findById(id).orElseThrow(() -> new NotFound("Anotação não encontrado com o id " + id));
+    public Daily listarAnotacao(Long id, String emailUsuario) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        Daily a = dailyRepository.findByIdAndUsuario(id, usuario)
+                .orElseThrow(() -> new NotFound("Anotação não encontrada ou não pertence ao usuário"));
+        a.setHumor(encryptor.decrypt(a.getHumor()));
         a.setAnotacao(encryptor.decrypt(a.getAnotacao()));
         return a;
     }
 
-    public List<Daily> listarTodasAnotacoes() {
-        List<Daily> lista = dailyRepository.findAll();
-        lista.forEach(a -> a.setAnotacao(encryptor.decrypt(a.getAnotacao())));
-        return lista;
-    }
 
-    public List<Daily> listarPorUsuario(Long usuarioId) {
-        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new NotFound("Usuário não encontrado"));
+    public List<Daily> listarPorUsuarioEmail(String emailUsuario) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
         List<Daily> lista = dailyRepository.findByUsuario(usuario);
+        lista.forEach(a -> a.setHumor(encryptor.decrypt(a.getHumor())));
         lista.forEach(a -> a.setAnotacao(encryptor.decrypt(a.getAnotacao())));
         return lista;
     }
 
 
     @Transactional
-    public void deletarAnotacao(Long id) {
-        if (!dailyRepository.existsById(id)) {
-            throw new NotFound("Anotação não encontrado com o id " + id);
-        }
-        dailyRepository.deleteById(id);
+    public void deletarAnotacao(Long id, String emailUsuario) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        Daily anotacao = dailyRepository.findByIdAndUsuario(id, usuario)
+                .orElseThrow(() -> new NotFound("Anotação não encontrada ou não pertence ao usuário"));
+        dailyRepository.delete(anotacao);
     }
+
 }
