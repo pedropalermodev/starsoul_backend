@@ -5,6 +5,7 @@ import br.com.itb.project.starsoul.exceptions.NotFound;
 import br.com.itb.project.starsoul.model.Daily;
 import br.com.itb.project.starsoul.model.Usuario;
 import br.com.itb.project.starsoul.repository.DailyRepository;
+import br.com.itb.project.starsoul.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validator;
@@ -20,16 +21,19 @@ import java.util.Set;
 public class DailyService {
 
     private final DailyRepository dailyRepository;
+    private final UsuarioRepository usuarioRepository;
     private final TextEncryptor encryptor;
     private final Validator validator;
 
     public DailyService(
             DailyRepository dailyRepository,
+            UsuarioRepository usuarioRepository,
             Validator validator,
             @Value("${app.crypto.password}") String password,
             @Value("${app.crypto.salt}") String salt)
     {
         this.dailyRepository = dailyRepository;
+        this.usuarioRepository = usuarioRepository;
         this.validator = validator;
         this.encryptor = Encryptors.text(password, salt);
     }
@@ -64,7 +68,8 @@ public class DailyService {
     }
 
     public List<Daily> listarPorUsuario(Long usuarioId) {
-        List<Daily> lista = dailyRepository.findByUsuarioId(usuarioId);
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new NotFound("Usuário não encontrado"));
+        List<Daily> lista = dailyRepository.findByUsuario(usuario);
         lista.forEach(a -> a.setAnotacao(encryptor.decrypt(a.getAnotacao())));
         return lista;
     }
