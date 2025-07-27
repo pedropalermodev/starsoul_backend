@@ -54,13 +54,21 @@ public class DailyService {
                 .orElseThrow(() -> new NotFound("Usuário não encontrado"));
     }
 
-    public Daily cadastrarAnotacao(Daily anotacao, String emailUsuario) {
-        validarAnotacao(anotacao);
-        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
-        anotacao.setUsuario(usuario);
-        anotacao.setHumor(encryptor.encrypt(anotacao.getHumor()));
-        anotacao.setAnotacao(encryptor.encrypt(anotacao.getAnotacao()));
-        return dailyRepository.save(anotacao);
+    @Transactional // Garante que a operação de persistência é atômica
+    public Daily cadastrarAnotacao(String humor, String anotacaoText, Long usuarioIdFromClient, String emailUsuarioFromToken) {
+        Usuario usuarioAutenticado = buscarUsuarioPorEmail(emailUsuarioFromToken);
+        if (!usuarioAutenticado.getId().equals(usuarioIdFromClient)) {
+            throw new BadRequest("ID de usuário inválido para a criação da anotação. Você só pode criar anotações para sua própria conta.");
+        }
+
+        Daily daily = new Daily();
+
+        daily.setHumor(encryptor.encrypt(humor));
+        daily.setAnotacao(encryptor.encrypt(anotacaoText));
+        daily.setUsuario(usuarioAutenticado);
+        validarAnotacao(daily);
+
+        return dailyRepository.save(daily);
     }
 
     public Daily listarAnotacao(Long id, String emailUsuario) {
@@ -89,5 +97,4 @@ public class DailyService {
                 .orElseThrow(() -> new NotFound("Anotação não encontrada ou não pertence ao usuário"));
         dailyRepository.delete(anotacao);
     }
-
 }
