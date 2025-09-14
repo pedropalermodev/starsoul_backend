@@ -59,4 +59,10 @@ public class HistoricoController {
     public ResponseEntity<List<Historico>> listarHistorico(Authentication authentication) {
         return ResponseEntity.ok(historicoService.listarHistorico(authentication.getName()));
     }
+
+    @DeleteMapping("/historico")
+    public ResponseEntity<Void> apagarHistorico(Authentication authentication) {
+        historicoService.apagarHistorico(authentication.getName());
+        return ResponseEntity.noContent().build();
+    }
 }

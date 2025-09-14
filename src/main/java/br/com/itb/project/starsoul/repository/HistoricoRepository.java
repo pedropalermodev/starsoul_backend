@@ -18,4 +18,6 @@ public interface HistoricoRepository extends JpaRepository<Historico, Long> {
 
     List<Historico> findAllByUsuarioAndFavoritadoTrue(Usuario usuario);
 
+    void deleteAllByUsuario(Usuario usuario);
+
 }

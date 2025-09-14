@@ -151,4 +151,10 @@ public class HistoricoService {
         return historicoRepository.findAllByUsuario(usuario);
     }
 
+    @Transactional
+    public void apagarHistorico(String emailUsuario) {
+        Usuario usuario = buscarUsuarioPorEmail(emailUsuario);
+        historicoRepository.deleteAllByUsuario(usuario);
+    }
+
 }
