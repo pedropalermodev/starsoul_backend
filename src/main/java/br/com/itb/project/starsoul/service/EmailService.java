@@ -42,7 +42,9 @@ public class EmailService {
 
             mailSender.send(mimeMessage);
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Erro ao enviar email de redefinição de senha", e);
         }
+
     }
 }
