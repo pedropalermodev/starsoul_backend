@@ -1,18 +1,17 @@
 package br.com.itb.project.starsoul.service;
 
-import jakarta.mail.internet.MimeMessage;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Map;
 
 @Service
 public class EmailService {
-    private final JavaMailSender mailSender;
 
-    public EmailService(JavaMailSender mailSender) {
-        this.mailSender = mailSender;
-    }
-
+    private final String apiKey = System.getenv("BREVO_API_KEY");
+    private final String fromEmail = System.getenv("BREVO_FROM_EMAIL");
+    private final String fromName = System.getenv("BREVO_FROM_NAME");
 
     private String corpoEmailRedefinicao(String token) {
         return "<html>" +
@@ -30,21 +29,33 @@ public class EmailService {
                 "</html>";
     }
 
-
     public void enviarRedefinicaoSenha(String toEmail, String token) {
         try {
-            MimeMessage mimeMessage = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "utf-8");
+            RestTemplate restTemplate = new RestTemplate();
+            String url = "https://api.brevo.com/v3/smtp/email";
 
-            helper.setTo(toEmail);
-            helper.setSubject("Redefinição de Senha - StarSoul");
-            helper.setText(corpoEmailRedefinicao(token), true);
+            Map<String, Object> body = Map.of(
+                    "sender", Map.of("email", fromEmail, "name", fromName),
+                    "to", new Map[]{ Map.of("email", toEmail) },
+                    "subject", "Redefinição de Senha - StarSoul",
+                    "htmlContent", corpoEmailRedefinicao(token)
+            );
 
-            mailSender.send(mimeMessage);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("api-key", apiKey);
+
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Erro ao enviar e-mail via Brevo: " + response.getBody());
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("Erro ao enviar email de redefinição de senha", e);
         }
-
     }
 }
