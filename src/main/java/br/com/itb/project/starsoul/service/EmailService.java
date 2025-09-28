@@ -22,13 +22,13 @@ public class EmailService {
                 "    <title>Redefinição de Senha</title>" +
                 "    <style>" +
                 "        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0ffef; margin:0; padding:0; }" +
-                "        .container { max-width:600px; margin:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); padding:30px; }" +
+                "        .container { max-width:500px; box-shadow:0 4px 12px rgba(0,0,0,0.08); padding:30px; }" +
                 "        .header-logo { text-align:center; padding-bottom:25px; border-bottom:1px solid #e0eeef; margin-bottom:20px; }" +
                 "        .header-logo img { max-width:180px; height:auto; display:block; margin:0 auto; }" +
                 "        h2 { color:#1a4a6b; font-size:20px; margin-bottom:20px; }" +
                 "        p { color:#4a4a4a; line-height:1.6; margin-bottom:15px; text-align:justify; }" +
                 "        .highlight { color:#004d66; font-weight:600; font-style:italic; }" +
-                "        .token-block { text-align:center; margin:25px 0; padding:20px; background:#1a4a6b; border-radius:8px; font-family:'Courier New', Courier, monospace; font-size:28px; font-weight:bold; color:#ffffff; box-shadow: 4px 4px 9px 1px rgba(26,74,107,0.75); -webkit-box-shadow: 4px 4px 9px 1px rgba(26,74,107,0.75); -moz-box-shadow: 4px 4px 9px 1px rgba(26,74,107,0.75);}" +
+                "        .token-block { text-align:center; margin:25px 0; padding:20px; background:#1a4a6b; border-radius:8px; font-family:monospace, Arial, sans-serif; font-size:28px; font-weight:bold; color:#ffffff; box-shadow: 4px 4px 9px 1px rgba(26,74,107,0.75); -webkit-box-shadow: 4px 4px 9px 1px rgba(26,74,107,0.75); -moz-box-shadow: 4px 4px 9px 1px rgba(26,74,107,0.75);}" +
                 "        .footer { color:#888888; font-size:12px; margin-top:30px; text-align:center; padding-top:15px; border-top:1px solid #f0f0f0; }" +
                 "    </style>" +
                 "</head>" +
