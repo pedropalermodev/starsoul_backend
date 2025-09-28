@@ -22,7 +22,7 @@ public class EmailService {
                 "    <title>Redefinição de Senha</title>" +
                 "    <style>" +
                 "        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f0ffef; margin:0; padding:0; }" +
-                "        .container { max-width:600px; margin:40px auto; background:#fff; border-radius:10px; border:1px solid #e0e0e0; box-shadow:0 4px 12px rgba(0,0,0,0.08); padding:30px; }" +
+                "        .container { max-width:600px; margin:20px; box-shadow:0 4px 12px rgba(0,0,0,0.08); padding:30px; }" +
                 "        .header-logo { text-align:center; padding-bottom:25px; border-bottom:1px solid #e0eeef; margin-bottom:20px; }" +
                 "        .header-logo img { max-width:180px; height:auto; display:block; margin:0 auto; }" +
                 "        h2 { color:#1a4a6b; font-size:20px; margin-bottom:20px; }" +
